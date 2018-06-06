@@ -1,0 +1,34 @@
+{
+    "name": "jonom/silverstripe-custom-errors",
+    "description": "Themed custom error responses for SilverStripe CMS",
+    "type": "silverstripe-vendormodule",
+    "license": "MIT",
+    "keywords": [
+        "silverstripe",
+        "error",
+        "errorpage"
+    ],
+    "authors": [
+        {
+            "name": "Jonathon Menz",
+            "homepage": "http://jonathonmenz.com"
+        }
+    ],
+    "require": {
+        "silverstripe/vendor-plugin": "^1.0",
+        "silverstripe/cms": "^4"
+    },
+    "replace": {
+        "silverstripe/errorpage":"*"
+    },
+    "autoload": {
+        "psr-4": {
+            "JonoM\\CustomErrors\\": "src/"
+        }
+    },
+    "extra": {
+        "installer-name": "custom-errors"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

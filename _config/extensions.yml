@@ -1,0 +1,9 @@
+---
+Name: custom-errors-extensions
+---
+SilverStripe\Control\Controller:
+  extensions:
+    - JonoM\CustomErrors\CustomErrorControllerExtension
+SilverStripe\Forms\Form:
+  extensions:
+    - JonoM\CustomErrors\CustomErrorControllerExtension

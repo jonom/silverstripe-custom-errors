@@ -1,0 +1,21 @@
+---
+Name: custom-errors
+---
+JonoM\CustomErrors\CustomErrorControllerExtension:
+  default_controller: 'PageController'
+  default_template: 'Page' # exclude .ss extension
+  custom_fields:
+    default:
+      Content:
+        Type: 'SilverStripe\ORM\FieldType\DBHTMLText'
+        Value: '<p>Sorry, there was a problem with handling your request.</p>'
+    e404:
+      Title: 'Not Found'
+      Content:
+        Type: 'SilverStripe\ORM\FieldType\DBHTMLText'
+        Value: '<p>Sorry, it seems you were trying to access a page that doesnʼt exist.</p><p>Please check the spelling of the URL you were trying to access and try again.</p>'
+    e500:
+      Title: 'Internal Server Error'
+      Content:
+        Type: 'SilverStripe\ORM\FieldType\DBHTMLText'
+        Value: '<p>Sorry, there was a problem with handling your request.</p>'
