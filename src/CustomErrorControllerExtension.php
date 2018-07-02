@@ -81,7 +81,13 @@ class CustomErrorControllerExtension extends Extension
             $defaultCustomFields,
             $customFields
         );
-        $body = $controllerType::create()->renderWith($template, $customFields);
+        // Remove 'Controller' from class name to get related Page type
+        $pageType = substr_replace($controllerType, '', strrpos($controllerType, 'Controller'), strlen('Controller'));
+        // Create a dummy page to act as a failover for the controller
+        $dataRecord = $pageType::create();
+        $dataRecord->ID = -1;
+        // Set the response body
+        $body = $controllerType::create($dataRecord)->renderWith($template, $customFields);
         $response->setBody($body);
         if ($response) {
             throw new HTTPResponse_Exception($response, $errorCode);
