@@ -75,7 +75,11 @@ class CustomErrorControllerExtension extends Extension
 
         // Otherwise build a themed response
         if (!$controllerType) $controllerType = $this->config()->get('default_controller');
-        if (!$template) $template = $this->config()->get('default_template');
+        $templates = [];
+        if ($template) $templates[] = $template;
+        // Fallback to default template
+        $templates[] = $this->config()->get('default_template');
+        $templates[] = 'Page';
         $defaultCustomFields = $this->defaultCustomFieldsFor($errorCode);
         $response = new HTTPResponse();
         $response->setStatusCode($errorCode);
@@ -102,7 +106,7 @@ class CustomErrorControllerExtension extends Extension
         $controller->setResponse(new HTTPResponse());
         $controller->doInit();
         $controller->pushCurrent();
-        $body = $controller->renderWith($template, $customFields);
+        $body = $controller->renderWith($templates, $customFields);
         $controller->popCurrent();
         $response->setBody($body);
         if ($response) {
