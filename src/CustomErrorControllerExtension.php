@@ -5,8 +5,10 @@ namespace JonoM\CustomErrors;
 use Page;
 use PageController;
 use SilverStripe\Control\Director;
+use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\HTTPResponse_Exception;
+use SilverStripe\Control\Session;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Extension;
 use SilverStripe\Forms\TextField;
@@ -68,26 +70,40 @@ class CustomErrorControllerExtension extends Extension
         if (Director::is_ajax()) {
             throw new HTTPResponse_Exception($errorMessage, $errorCode);
         }
+
+        // Hey, what's up? If you know lots about controllers, requests and responses, feel free to rewrite all of this.
+
         // Otherwise build a themed response
         if (!$controllerType) $controllerType = $this->config()->get('default_controller');
         if (!$template) $template = $this->config()->get('default_template');
         $defaultCustomFields = $this->defaultCustomFieldsFor($errorCode);
         $response = new HTTPResponse();
         $response->setStatusCode($errorCode);
-        // Set some default properties, then override with custom ones if provided
+        // Reset current page in case we're getting a 404 on a nested page. This prevents menus being styled according to parent pages.
+        Director::set_current_page(null);
+        // Set some default properties for the page, then override with custom ones if provided
         $customFields = array_merge(
             // Use title from config if set, otherwise fall back to framework definition
             ['Title' => $response->getStatusDescription()],
             $defaultCustomFields,
             $customFields
         );
-        // Remove 'Controller' from class name to get related Page type
+        // Create a dummy page to act as a failover for the controller.  Remove 'Controller' from class name to get related Page type
         $pageType = substr_replace($controllerType, '', strrpos($controllerType, 'Controller'), strlen('Controller'));
-        // Create a dummy page to act as a failover for the controller
         $dataRecord = $pageType::create();
-        $dataRecord->ID = -1;
-        // Set the response body
-        $body = $controllerType::create($dataRecord)->renderWith($template, $customFields);
+        // Negative ID as it's a fake. Use error code so we have an ID for partial caching etc.
+        $dataRecord->ID = -$errorCode;
+        // Create a request with an empty session, so session data is not rendered and potentially lost to error responses.
+        $request = new HTTPRequest('GET', '');
+        $request->setSession(new Session([]));
+        // Render the response body
+        $controller = $controllerType::create($dataRecord);
+        $controller->setRequest($request);
+        $controller->setResponse(new HTTPResponse());
+        $controller->doInit();
+        $controller->pushCurrent();
+        $body = $controller->renderWith($template, $customFields);
+        $controller->popCurrent();
         $response->setBody($body);
         if ($response) {
             throw new HTTPResponse_Exception($response, $errorCode);
