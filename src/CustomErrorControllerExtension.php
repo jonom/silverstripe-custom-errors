@@ -87,8 +87,12 @@ class CustomErrorControllerExtension extends Extension
         Director::set_current_page(null);
         // Set some default properties for the page, then override with custom ones if provided
         $customFields = array_merge(
-            // Use title from config if set, otherwise fall back to framework definition
-            ['Title' => $response->getStatusDescription()],
+            [
+                // Use title from config if set, otherwise fall back to framework definition
+                'Title' => $response->getStatusDescription(),
+                // Add the error code so it's available in templates
+                'ErrorResponseCode' => $errorCode,
+            ],
             $defaultCustomFields,
             $customFields
         );
@@ -97,11 +101,14 @@ class CustomErrorControllerExtension extends Extension
         $dataRecord = $pageType::create();
         // Negative ID as it's a fake. Use error code so we have an ID for partial caching etc.
         $dataRecord->ID = -$errorCode;
+        $dataRecord->update($customFields);
         // Create a request with an empty session, so session data is not rendered and potentially lost to error responses.
         $request = new HTTPRequest('GET', '');
         $request->setSession(new Session([]));
         // Render the response body
         $controller = $controllerType::create($dataRecord);
+
+        // To Do: all of this...
         $controller->setRequest($request);
         $controller->setResponse(new HTTPResponse());
         $controller->doInit();
@@ -109,6 +116,9 @@ class CustomErrorControllerExtension extends Extension
         $body = $controller->renderWith($templates, $customFields);
         $controller->popCurrent();
         $response->setBody($body);
+        // ... Could be replaced with just this, but would lose custom template support
+        // $response = $controller->handleRequest($request);
+
         if ($response) {
             throw new HTTPResponse_Exception($response, $errorCode);
         }
