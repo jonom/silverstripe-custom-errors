@@ -41,8 +41,9 @@ class CustomErrorControllerExtension extends Extension
     public function onBeforeHTTPError($errorCode, $request, $errorMessage = null)
     {
         // Use provided error message only if no content is specified in yml config. This is because the error messages used in non-user code when calling ->httpError may not be suitable to show to a user.
+        $customFieldsConfig = $this->config()->get('custom_fields');
         $customFields = [];
-        if (!isset($this->config()->get('custom_fields')['e' .$errorCode])) $customFields['Content'] = $errorMessage;
+        if (!isset($customFieldsConfig['e' .$errorCode])) $customFields['Content'] = $errorMessage;
         return $this->customError($errorCode, $customFields);
     }
 
