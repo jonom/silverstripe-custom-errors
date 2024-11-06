@@ -15,8 +15,7 @@
         }
     ],
     "require": {
-        "silverstripe/vendor-plugin": "^1.0",
-        "silverstripe/cms": "^4"
+        "silverstripe/cms": "^4 || ^5"
     },
     "replace": {
         "silverstripe/errorpage":"*"
